@@ -1,0 +1,29 @@
+---
+title: "MP4"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(mdsr)
+library(RMySQL)
+library(tidyverse)
+db <- dbConnect_scidb(dbname = "imdb")
+```
+
+```{r}
+
+dv_sv_movies <- db %>%
+dbGetQuery("SELECT DISTINCT ci.person_id, mi.info, mi.movie_id, akat.title, n.name, n.gender, ci.nr_order 
+FROM movie_info AS mi 
+JOIN info_type it ON it.id = mi.info_type_id  
+JOIN aka_title akat ON akat.movie_id = mi.movie_id
+JOIN cast_info ci ON ci.movie_id = mi.movie_id
+JOIN name n ON n.id = ci.person_id
+WHERE (it.id = 97 AND ci.nr_order IS NOT NULL AND n.gender IS NOT NULL)  
+AND (mi.info LIKE '%domestic violence%' OR mi.info LIKE '%sexual violence%');")
+
+```
