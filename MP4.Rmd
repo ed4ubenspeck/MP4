@@ -17,13 +17,56 @@ db <- dbConnect_scidb(dbname = "imdb")
 ```{r}
 
 dv_sv_movies <- db %>%
-dbGetQuery("SELECT DISTINCT ci.person_id, mi.info, mi.movie_id, akat.title, n.name, n.gender, ci.nr_order 
+dbGetQuery("SELECT DISTINCT ci.person_id, mi.info, mi.movie_id, t.title, n.name, n.gender, ci.nr_order 
 FROM movie_info AS mi 
 JOIN info_type it ON it.id = mi.info_type_id  
 JOIN aka_title akat ON akat.movie_id = mi.movie_id
+JOIN title t ON t.title = akat.title
+JOIN kind_type kt ON kt.id = t.kind_id
 JOIN cast_info ci ON ci.movie_id = mi.movie_id
 JOIN name n ON n.id = ci.person_id
-WHERE (it.id = 97 AND ci.nr_order IS NOT NULL AND n.gender IS NOT NULL)  
-AND (mi.info LIKE '%domestic violence%' OR mi.info LIKE '%sexual violence%');")
+WHERE it.id = 97 AND (ci.nr_order IS NOT NULL AND n.gender IS NOT NULL) 
+AND (mi.info LIKE '%domestic violence%' OR mi.info LIKE '%sexual violence%')
+AND t.kind_id = 1;")
+
+
+
+
+
+v_movies <- db %>%
+dbGetQuery("SELECT DISTINCT ci.person_id, mi.info, mi.movie_id, t.title, n.name, n.gender, ci.nr_order 
+FROM movie_info AS mi 
+JOIN info_type it ON it.id = mi.info_type_id  
+JOIN aka_title akat ON akat.movie_id = mi.movie_id
+JOIN title t ON t.title = akat.title
+JOIN kind_type kt ON kt.id = t.kind_id
+JOIN cast_info ci ON ci.movie_id = mi.movie_id
+JOIN name n ON n.id = ci.person_id
+WHERE it.id = 97 AND (ci.nr_order IS NOT NULL AND n.gender IS NOT NULL) 
+AND (mi.info LIKE '%violence%')
+AND t.kind_id = 1;")
+```
+
+
+Data Wrangling for Orientation: 
+```{r}
+v_analysis <- v_movies %>%
+  filter(gender == 'f') %>%
+  filter(nr_order <= 5 & nr_order != 0) %>%
+  group_by(movie_id) %>%
+  summarize(N = n())
+
+v1 <- split(v_movies, v_movies$movie_id)
+v2 <- lapply(v1, test_f)
+v3 <- do.call("rbind", v2.5)
+
+test_f <- function(i){
+  i %>%
+    filter(nr_order > 0 & nr_order <= 5)
+}
+
+v3.5 <- v3 %>%
+  
+
 
 ```
