@@ -58,7 +58,7 @@ v_analysis <- v_movies %>%
 
 v1 <- split(v_movies, v_movies$movie_id)
 v2 <- lapply(v1, test_f)
-v3 <- do.call("rbind", v2.5)
+v3 <- do.call("rbind", v2)
 
 test_f <- function(i){
   i %>%
