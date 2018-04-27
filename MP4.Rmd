@@ -20,8 +20,7 @@ dv_sv_movies <- db %>%
 dbGetQuery("SELECT DISTINCT ci.person_id, mi.info, mi.movie_id, t.title, n.name, n.gender, ci.nr_order 
 FROM movie_info AS mi 
 JOIN info_type it ON it.id = mi.info_type_id  
-JOIN aka_title akat ON akat.movie_id = mi.movie_id
-JOIN title t ON t.title = akat.title
+JOIN title t ON t.id = mi.movie_id
 JOIN kind_type kt ON kt.id = t.kind_id
 JOIN cast_info ci ON ci.movie_id = mi.movie_id
 JOIN name n ON n.id = ci.person_id
@@ -37,8 +36,7 @@ v_movies <- db %>%
 dbGetQuery("SELECT DISTINCT ci.person_id, mi.info, mi.movie_id, t.title, n.name, n.gender, ci.nr_order 
 FROM movie_info AS mi 
 JOIN info_type it ON it.id = mi.info_type_id  
-JOIN aka_title akat ON akat.movie_id = mi.movie_id
-JOIN title t ON t.title = akat.title
+JOIN title t ON t.id = mi.movie_id
 JOIN kind_type kt ON kt.id = t.kind_id
 JOIN cast_info ci ON ci.movie_id = mi.movie_id
 JOIN name n ON n.id = ci.person_id
