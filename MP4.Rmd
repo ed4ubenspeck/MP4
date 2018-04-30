@@ -78,7 +78,7 @@ Count of total female directors and producers:
 ```{r, EVAL = FALSE}
 ## Counts for both male and female directors/producers
 
-db %>%
+count1 <- db %>%
   dbGetQuery("SELECT COUNT(DISTINCT ci.person_id)
 FROM cast_info ci
 JOIN title t ON ci.movie_id = t.id
@@ -87,7 +87,7 @@ WHERE (ci.role_id = 8 or ci.role_id = 3)
 AND (t.kind_id = 1 or t.kind_id = 2 or t.kind_id = 3)
 AND n.gender = 'f';")
 
-db %>%
+count2 <- db %>%
   dbGetQuery("SELECT COUNT(DISTINCT ci.person_id)
 FROM cast_info ci
 JOIN title t ON ci.movie_id = t.id
