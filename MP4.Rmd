@@ -58,6 +58,23 @@ AND it.id = 97
 AND n.gender IS NOT NULL;")
 ```
 
+```{r}
+direct_ep <- db %>%
+  dbGetQuery("SELECT DISTINCT n.name AS director, ci.person_id, n.gender, mi.info, t.title
+FROM cast_info ci
+JOIN name n ON n.id = ci.person_id
+JOIN movie_info mi ON mi.movie_id = ci.movie_id
+JOIN title t ON ci.movie_id = t.id
+JOIN info_type it ON it.id = mi.info_type_id 
+WHERE (role_id = 8 or role_id = 3)
+AND (mi.info LIKE '%domestic violence%' OR mi.info LIKE '%sexual violence%')
+AND (t.kind_id = 1 or t.kind_id = 2 or t.kind_id = 3)
+AND it.id = 97
+AND n.gender IS NOT NULL;")
+```
+
+
+
 
 Data Wrangling for Orientation: 
 ```{r}
