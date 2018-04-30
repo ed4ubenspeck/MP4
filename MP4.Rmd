@@ -26,7 +26,7 @@ JOIN cast_info ci ON ci.movie_id = mi.movie_id
 JOIN name n ON n.id = ci.person_id
 WHERE it.id = 97 AND (ci.nr_order IS NOT NULL AND n.gender IS NOT NULL) 
 AND (mi.info LIKE '%domestic violence%' OR mi.info LIKE '%sexual violence%')
-AND (t.kind_id = or t.kind_id = 2 or t.kind_id = 3);")
+AND (t.kind_id = 1 or t.kind_id = 2 or t.kind_id = 3);")
 
 
 
@@ -42,7 +42,7 @@ JOIN cast_info ci ON ci.movie_id = mi.movie_id
 JOIN name n ON n.id = ci.person_id
 WHERE it.id = 97 AND (ci.nr_order IS NOT NULL AND n.gender IS NOT NULL) 
 AND (mi.info LIKE '%violence%')
-AND (t.kind_id = or t.kind_id = 2 or t.kind_id = 3);")
+AND (t.kind_id = 1 or t.kind_id = 2 or t.kind_id = 3);")
 
 ## Directors of movies rated for domestic or sexual violemce
 directors <- db %>%
@@ -54,7 +54,7 @@ JOIN title t ON ci.movie_id = t.id
 JOIN info_type it ON it.id = mi.info_type_id 
 WHERE role_id = 8
 AND (mi.info LIKE '%domestic violence%' OR mi.info LIKE '%sexual violence%')
-AND (t.kind_id = or t.kind_id = 2 or t.kind_id = 3)
+AND (t.kind_id = 1 or t.kind_id = 2 or t.kind_id = 3)
 AND it.id = 97
 AND n.gender IS NOT NULL;")
 
