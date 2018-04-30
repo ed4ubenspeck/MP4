@@ -44,6 +44,7 @@ WHERE it.id = 97 AND (ci.nr_order IS NOT NULL AND n.gender IS NOT NULL)
 AND (mi.info LIKE '%violence%')
 AND t.kind_id = 1;")
 
+## Directors of movies rated for domestic or sexual violemce
 directors <- db %>%
   dbGetQuery("SELECT n.name AS director, ci.person_id, n.gender, mi.info, t.title
 FROM cast_info ci
@@ -56,9 +57,8 @@ AND (mi.info LIKE '%domestic violence%' OR mi.info LIKE '%sexual violence%')
 AND t.kind_id = 1
 AND it.id = 97
 AND n.gender IS NOT NULL;")
-```
 
-```{r}
+## Directors and producers for movies, tv movies, and tv series rated for sexual or domestic violence
 direct_ep <- db %>%
   dbGetQuery("SELECT DISTINCT n.name AS director, ci.person_id, n.gender, mi.info, t.title
 FROM cast_info ci
@@ -73,6 +73,29 @@ AND it.id = 97
 AND n.gender IS NOT NULL;")
 ```
 
+
+Count of total female directors and producers:
+```{r, EVAL = FALSE}
+## Counts for both male and female directors/producers
+
+db %>%
+  dbGetQuery("SELECT COUNT(DISTINCT ci.person_id)
+FROM cast_info ci
+JOIN title t ON ci.movie_id = t.id
+JOIN name n ON n.id = ci.person_id
+WHERE (ci.role_id = 8 or ci.role_id = 3)
+AND (t.kind_id = 1 or t.kind_id = 2 or t.kind_id = 3)
+AND n.gender = 'f';")
+
+db %>%
+  dbGetQuery("SELECT COUNT(DISTINCT ci.person_id)
+FROM cast_info ci
+JOIN title t ON ci.movie_id = t.id
+JOIN name n ON n.id = ci.person_id
+WHERE (ci.role_id = 8 or ci.role_id = 3)
+AND (t.kind_id = 1 or t.kind_id = 2 or t.kind_id = 3)
+AND n.gender = 'm';")
+```
 
 
 
