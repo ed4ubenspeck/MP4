@@ -86,7 +86,22 @@ AND (t.kind_id = 1 or t.kind_id = 2 or t.kind_id = 3)
 AND it.id = 97
 AND n.gender IS NOT NULL;")
 
-## OR for answering: 
+## OR for answering: Do female directors have higher odds of directing a movie rated for a type of sexual violence than male directors?
+directors_v_clean <- directors_violence %>%
+  mutate(gender_num = ifelse(gender == 'm', 0, 1)) %>%
+  mutate(dv = grepl('domestic violence', info, ignore.case = TRUE)) %>%
+  mutate(dv = ifelse(dv == FALSE, 0, 1)) %>%
+  mutate(r = grepl('rape', info, ignore.case = TRUE)) %>%
+  mutate(r = ifelse(r == FALSE, 0, 1)) %>%
+  mutate(sv = grepl('sexual violence', info, ignore.case = TRUE)) %>%
+  mutate(sv = ifelse(sv == TRUE, 1, 0)) %>%
+  mutate(dv_r_sv = ifelse(dv == 1 | r == 1 | sv == 1, 1, 0))
+
+or_direct_sv <-glm(data = directors_v_clean, dv_r_sv~gender_num, family=quasibinomial(link="logit"))
+summary(or_direct_sv)
+exp(cbind(OR=coef(or_direct_sv), confint(or_direct_sv)))
+##Answer: YES!!! When taking all movies rated for some kind of violence, female directors have significantly higher odds of being associated with a movie rated for domestic violence, rape, or sexual violence
+
 
 ## Directors and producers for movies, tv movies, and tv series rated for sexual or domestic violence, distinguished by role type
 dp_distinct <- db %>%
