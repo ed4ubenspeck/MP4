@@ -1,0 +1,50 @@
+---
+title: "OR and Numbers"
+output: html_document
+---
+
+
+```{r}
+
+## OR for answering: Do female directors have higher odds of directing a movie rated for a type of sexual violence than male directors?
+or_direct_sv <-glm(data = directors_v_clean, dv_r_sv~gender_num, family=quasibinomial(link="logit"))
+summary(or_direct_sv)
+exp(cbind(OR=coef(or_direct_sv), confint(or_direct_sv)))
+##Answer: YES!!! When taking all movies rated for some kind of violence, female directors have significantly higher odds of being associated with a movie rated for domestic violence, rape, or sexual violence
+
+## OR for answering question: Do female directors have higher odds of directing films rated for rape/domestic violence out of movies containing sexual violence? 
+or_fem_direct <- glm(data = sv_directors, dv_r~gender_num, family=quasibinomial(link="logit"))
+summary(or_fem_direct)
+exp(cbind(OR=coef(or_fem_direct), confint(or_fem_direct)))
+## Answer: not signficant, but this is interesting and unexpected! 
+
+## OR for odds that a movie rated for domestic violence will be directed/produced by a female (out of movies rated for types of sexual violence)
+or_gender_dv <-glm(data = dp_model_set, dv~gender_num, family=quasibinomial(link="logit"))
+summary(or_gender_dv)
+exp(cbind(OR=coef(or_gender_dv), confint(or_gender_dv)))
+## Answer: Females do not have significantly higher odds of directing/producing a movie rated for domestic violence out of movies rated fro types of sexual violence. 
+
+
+## OR for odds that a movie rated for rape will be directed/produced by a female (out of movies rated for types of sexual violence)
+or_gender_r <-glm(data = dp_model_set, r~gender_num, family=quasibinomial(link="logit"))
+summary(or_gender_r)
+exp(cbind(OR=coef(or_gender_r), confint(or_gender_r)))
+## Answer: females do not have significantly higher odds of directing/producing a movie rated for rape out of movies rated for all types of sexual violence. 
+
+## OR for odds that media rated for domestic violence/rape will be directed/produced by a female (out of media rated for all types of violence)
+or_gender_dvr <- glm(data = directors_producers_media, dvr~gender_num, family=quasibinomial(link = "logit"))
+summary(or_gender_dvr)
+exp(cbind(OR=coef(or_gender_dvr), confint(or_gender_dvr)))
+## Not significant
+
+## OR for odds that a female actress will be associated with a move containing domestic violence (out of all movies rated for violence)
+or_gender_v <- glm(data = v_media, dv~gender_num, family=quasibinomial(link="logit"))
+summary(or_gender_v)
+exp(cbind(OR=coef(or_gender_v), confint(or_gender_v)))
+## Answer: Female actresses have significantly higher odds of being associated with a movie rated for domestic violence than male actors
+
+## added a variable for if an actor/actress is in top five billed, will be using for analysis of following question: Among movies rated for rape/domestic violence, are women more or less likely to be billed highly?
+or_billed_rdv <- glm(data = v_media_top_rdv, ranked~gender_num, family=quasibinomial(link="logit"))
+summary(or_billed_r)
+exp(cbind(OR=coef(or_billed_r), confint(or_billed_r)))
+## Answer: Females do not have significantly different odds of being billed highly in movies rated for rape/domestic violence than male actors

@@ -199,7 +199,6 @@ directors_producers_media <- directors_producers_media %>%
 or_gender_dvr <- glm(data = directors_producers_media, dvr~gender_num, family=quasibinomial(link = "logit"))
 summary(or_gender_dvr)
 exp(cbind(OR=coef(or_gender_dvr), confint(or_gender_dvr)))
-
 ## Not significant
 
 v_media <- v_media %>%
