@@ -187,6 +187,21 @@ summary(or_gender_r)
 exp(cbind(OR=coef(or_gender_r), confint(or_gender_r)))
 ## Answer: females do not have significantly higher odds of directing/producing a movie rated for rape out of movies rated for all types of sexual violence. 
 
+## OR for odds that media rated for domestic violence/rape will be directed/produced by a female (out of media rated for all types of violence)
+directors_producers_media <- directors_producers_media %>%
+  mutate(gender_num = ifelse(gender == 'm', 0, 1)) %>%
+  mutate(dv = grepl('domestic violence', info, ignore.case = TRUE)) %>%
+  mutate(dv = ifelse(dv == FALSE, 0, 1)) %>%
+  mutate(r = grepl('rape', info, ignore.case = TRUE)) %>%
+  mutate(r = ifelse(r == FALSE, 0, 1)) %>%
+  mutate(dvr = ifelse(r == 1 | dv == 1, 1, 0))
+
+or_gender_dvr <- glm(data = directors_producers_media, dvr~gender_num, family=quasibinomial(link = "logit"))
+summary(or_gender_dvr)
+exp(cbind(OR=coef(or_gender_dvr), confint(or_gender_dvr)))
+
+## Not significant
+
 v_media <- v_media %>%
   mutate(gender_num = ifelse(gender == 'm', 0, 1)) %>%
   mutate(dv = grepl('domestic violence', info, ignore.case = TRUE)) %>%
