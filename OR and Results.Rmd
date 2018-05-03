@@ -48,3 +48,4 @@ or_billed_rdv <- glm(data = v_media_top_rdv, ranked~gender_num, family=quasibino
 summary(or_billed_r)
 exp(cbind(OR=coef(or_billed_r), confint(or_billed_r)))
 ## Answer: Females do not have significantly different odds of being billed highly in movies rated for rape/domestic violence than male actors
+```
