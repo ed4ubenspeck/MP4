@@ -201,18 +201,16 @@ exp(cbind(OR=coef(or_gender_v), confint(or_gender_v)))
 ## Answer: Female actresses have significantly higher odds of being associated with a movie rated for domestic violence than male actors
 
 
-## added a variable for if an actor/actress is in top five billed, will be using for analysis of following question: Among movies rated for rape, are women more or less likely to be billed highly?
-v_media_top_r <- v_media %>%
+## added a variable for if an actor/actress is in top five billed, will be using for analysis of following question: Among movies rated for rape/domestic violence, are women more or less likely to be billed highly?
+v_media_top_rdv <- v_media %>%
   mutate(ranked = ifelse(nr_order <= 5, 1, 0)) %>%
-  mutate(r = grepl('rape', info, ignore.case = TRUE)) %>%
-  mutate(r = ifelse(r == FALSE, 0, 1)) %>%
-  filter(r == 1)
+  filter(r == 1 | dv == 1)
 
 
-or_billed_r <- glm(data = v_media_top_r, ranked~gender_num, family=quasibinomial(link="logit"))
+or_billed_rdv <- glm(data = v_media_top_rdv, ranked~gender_num, family=quasibinomial(link="logit"))
 summary(or_billed_r)
 exp(cbind(OR=coef(or_billed_r), confint(or_billed_r)))
-## Answer: Females do not have significantly different odds of being billed highly in movies rated for rape than male actors
+## Answer: Females do not have significantly different odds of being billed highly in movies rated for rape/domestic violence than male actors
 
 
 
