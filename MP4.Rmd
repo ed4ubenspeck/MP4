@@ -217,6 +217,8 @@ or_list <- list(or_direct_sv, or_billed_rdv, or_fem_direct, or_gender_dv, or_gen
 
 focus_var_names <- c("direct_sv", "billed_rdv", "fem_direct", "gender_dv", "gender_dvr", "gender_r", "gender_v")
 
+blurbs <- c("Female directors have 3.43x higher odds of being associated with on-screen media rated for sexual violence than male directors, out of all movies rated for violence.",  "Female actresses do not have significantly greater odds of being billed highly (<5) in on-screen media rated for rape or domestic violence than male actors.", "Female directors do not have significantly greater odds of being associated with on-screen media rated for domestic violence, out of movies rated for sexual violence.", "Female directors/producers do not have significantly greater odds of being associated with on-screen media rated for domestic violence, out of media rated for sexual violence.", "Female directors/producers do not have significantly greater odds of being associated with on-screen media rated for domestic violence or rape, out of media rated for violence.", "Insert gender_r blurb", "Female actresses have significantly greater odds of being associated with on-screen media rated for domestic violence than male actors, out of media rated for violence.")
+
 big_table <- lapply(or_list, make_table) %>%
   bind_rows() %>%
   mutate(focus_var = focus_var_names) %>%
@@ -232,7 +234,7 @@ gg <- ggplot(big_table, aes(x = p.value, y = focus_var, color = sig)) +
 ## using dev version of plotly
 ## devtools::install_github("ropensci/ plotly")
 int_plot <- ggplotly(gg)
-int_plot <- style(int_plot, hoverinfo = 'text', text = c("Female directors have 3.43x higher odds of being associated with on-screen media rated for sexual violence than male directors, out of all movies rated for violence.",  "Female actresses do not have significantly greater odds of being billed highly (<5) in on-screen media rated for rape or domestic violence than male actors.", "Female directors do not have significantly greater odds of being associated with on-screen media rated for domestic violence, out of movies rated for sexual violence.", "Female directors/producers do not have significantly greater odds of being associated with on-screen media rated for domestic violence, out of media rated for sexual violence.", "Insert gender_r blurb", "Female directors/producers do not have significantly greater odds of being associated with on-screen media rated for domestic violence or rape, out of media rated for violence.",   "Female actresses have significantly greater odds of being associated with on-screen media rated for domestic violence than male actors, out of media rated for violence."))
+int_plot <- style(int_plot, hoverinfo = 'text', text = big_table$blurbs)
 int_plot
 ```
 
