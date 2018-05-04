@@ -2,7 +2,7 @@
 title: "MP4"
 output: 
   html_document:
-    code_folding: TRUE
+    code_folding: hide
 
 ---
 
@@ -15,6 +15,7 @@ library(mdsr)
 library(RMySQL)
 library(tidyverse)
 library(broom)
+library(plotly)
 db <- dbConnect_scidb(dbname = "imdb")
 ```
 
@@ -198,8 +199,8 @@ v_media_top_rdv <- v_media %>%
 
 
 or_billed_rdv <- glm(data = v_media_top_rdv, ranked~gender_num, family=quasibinomial(link="logit"))
-summary(or_billed_r)
-exp(cbind(OR=coef(or_billed_r), confint(or_billed_r)))
+summary(or_billed_rdv)
+exp(cbind(OR=coef(or_billed_rdv), confint(or_billed_rdv)))
 ## Answer: Females do not have significantly different odds of being billed highly in movies rated for rape/domestic violence than male actors
 ```
 
@@ -214,37 +215,25 @@ make_table <- function(or_arg){
 
 or_list <- list(or_direct_sv, or_billed_rdv, or_fem_direct, or_gender_dv, or_gender_dvr, or_gender_r, or_gender_v)
 
-big_table <- lapply(or_list, make_table) %>%
-  bind_rows()
+focus_var_names <- c("direct_sv", "billed_rdv", "fem_direct", "gender_dv", "gender_dvr", "gender_r", "gender_v")
 
-tidy_direct_sv <- tidy(or_direct_sv) %>%
-  select(term, p.value) %>%
-  filter(term == "gender_num") %>%
-  mutate(focus_var = "direct_sv")
-tidy_billed_rdv <- tidy(or_billed_rdv) %>%
-  select(term, p.value) %>%
-  filter(term == "gender_num") %>%
-  mutate(focus_var = "billed_rdv")
-tidy_fem_direct <- tidy(or_fem_direct) %>%
-  select(term, p.value) %>%
-  filter(term == "gender_num") %>%
-  mutate(focus_var = "fem_direct")
-tidy_gender_dv <- tidy(or_gender_dv) %>%
-  select(term, p.value) %>%
-  filter(term == "gender_num") %>%
-  mutate(focus_var = "gender_dv")
-tidy_gender_dvr <- tidy(or_gender_dvr) %>%
-  select(term, p.value) %>%
-  filter(term == "gender_num") %>%
-  mutate(focus_var = "gender_dvr")
-tidy_gender_r <- tidy(or_gender_r) %>%
-  select(term, p.value) %>%
-  filter(term == "gender_num") %>%
-  mutate(focus_var = "gender_r")
-tidy_gender_v <- tidy(or_gender_v) %>%
-  select(term, p.value) %>%
-  filter(term == "gender_num") %>%
-  mutate(focus_var = "gender_v")
+big_table <- lapply(or_list, make_table) %>%
+  bind_rows() %>%
+  mutate(focus_var = focus_var_names) %>%
+  mutate(blurbs = blurbs) %>%
+  mutate(sig = ifelse(p.value <= .05, "significant", "insignificant"))
+
+
+## using updated version of ggplot2
+## devtools::install_github('hadley/ggplot2')
+gg <- ggplot(big_table, aes(x = p.value, y = focus_var, color = sig)) +
+  geom_point()
+
+## using dev version of plotly
+## devtools::install_github("ropensci/ plotly")
+int_plot <- ggplotly(gg)
+int_plot <- style(int_plot, hoverinfo = 'text', text = c("Female directors have 3.43x higher odds of being associated with on-screen media rated for sexual violence than male directors, out of all movies rated for violence.",  "Female actresses do not have significantly greater odds of being billed highly (<5) in on-screen media rated for rape or domestic violence than male actors.", "Female directors do not have significantly greater odds of being associated with on-screen media rated for domestic violence, out of movies rated for sexual violence.", "Female directors/producers do not have significantly greater odds of being associated with on-screen media rated for domestic violence, out of media rated for sexual violence.", "Insert gender_r blurb", "Female directors/producers do not have significantly greater odds of being associated with on-screen media rated for domestic violence or rape, out of media rated for violence.",   "Female actresses have significantly greater odds of being associated with on-screen media rated for domestic violence than male actors, out of media rated for violence."))
+int_plot
 ```
 
 
