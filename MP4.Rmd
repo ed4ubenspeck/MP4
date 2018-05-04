@@ -230,6 +230,18 @@ exp(cbind(OR=coef(or_billed_r), confint(or_billed_r)))
 
 Saving odds ratio results as tidy data frames; only p-values:
 ```{r}
+
+make_table <- function(or_arg){
+  tidy(or_arg) %>%
+    select(term, p.value) %>%
+    filter(term == "gender_num")
+}
+
+or_list <- list(or_direct_sv, or_billed_rdv, or_fem_direct, or_gender_dv, or_gender_dvr, or_gender_r, or_gender_v)
+
+big_table <- lapply(or_list, make_table) %>%
+  bind_rows()
+
 tidy_direct_sv <- tidy(or_direct_sv) %>%
   select(term, p.value) %>%
   filter(term == "gender_num") %>%
