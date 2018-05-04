@@ -228,19 +228,29 @@ exp(cbind(OR=coef(or_billed_r), confint(or_billed_r)))
 ## Answer: Females do not have significantly different odds of being billed highly in movies rated for rape/domestic violence than male actors
 ```
 
-Tidying odds ratio results:
+Saving odds ratio results as tidy data frames; only p-values:
 ```{r}
-tidy_direct_sv <- tidy(or_direct_sv)
-tidy_billed_rdv <- tidy(or_billed_rdv)
-tidy_fem_direct <- tidy(or_fem_direct)
-tidy_gender_dv <- tidy(or_gender_dv)
-tidy_gender_dvr <- tidy(or_gender_dvr)
-tidy_gender_r <- tidy(or_gender_r)
-tidy_gender_v <- tidy(or_gender_v)
+tidy_direct_sv <- tidy(or_direct_sv) %>%
+  select(term, p.value) %>%
+  filter(term == "gender_num")
+tidy_billed_rdv <- tidy(or_billed_rdv) %>%
+  select(term, p.value) %>%
+  filter(term == "gender_num")
+tidy_fem_direct <- tidy(or_fem_direct) %>%
+  select(term, p.value) %>%
+  filter(term == "gender_num")
+tidy_gender_dv <- tidy(or_gender_dv) %>%
+  select(term, p.value) %>%
+  filter(term == "gender_num")
+tidy_gender_dvr <- tidy(or_gender_dvr) %>%
+  select(term, p.value) %>%
+  filter(term == "gender_num")
+tidy_gender_r <- tidy(or_gender_r) %>%
+  select(term, p.value) %>%
+  filter(term == "gender_num")
+tidy_gender_v <- tidy(or_gender_v) %>%
+  select(term, p.value) %>%
+  filter(term == "gender_num")
 ```
-
-
-
-
 
 
