@@ -17,6 +17,7 @@ library(RMySQL)
 library(tidyverse)
 library(broom)
 library(plotly)
+library(ggthemes)
 db <- dbConnect_scidb(dbname = "imdb")
 ```
 
@@ -168,7 +169,8 @@ or_gender_v <- glm(data = v_media, dv~gender_num, family = quasibinomial(link = 
 or_billed_rdv <- glm(data = v_media_top_rdv, ranked~gender_num, family = quasibinomial(link = "logit"))
 ```
 
-Saving odds ratio results as tidy data frames; only p-values:
+Saving odds ratio results as tidy data frames; only p-values;
+Hover over point for info:
 ```{r, warning = FALSE, message = FALSE}
 
 make_table <- function(or_arg) {
@@ -181,7 +183,7 @@ or_list <- list(or_direct_sv, or_billed_rdv, or_fem_direct, or_gender_dv, or_gen
 
 focus_var_names <- c("direct_sv", "billed_rdv", "fem_direct", "gender_dv", "gender_dvr", "gender_r", "gender_v")
 
-blurbs <- c("Female directors have 3.43x higher odds <br> of being associated with on-screen media <br> rated for sexual violence than male directors, <br> out of all movies rated for violence.", "Female actresses do not have significantly greater <br> odds of being billed highly (<5) in on-screen media rated for <br> rape or domestic violence than male actors.", "Female directors do not have <br> significantly greater odds of being <br> associated with on-screen media <br> rated for domestic violence, out <br> of movies rated for sexual violence.", "Female directors/producers do not have <br> significantly greater odds of being <br> associated with on-screen media rated <br> for domestic violence, out of media <br> rated for sexual violence.", "Female directors/producers do not have <br> significantly greater odds of being associated <br> with on-screen media rated for domestic <br> violence or rape, out of media rated for violence.", "Insert gender_r blurb", "Female actresses have significantly <br> greater odds of being associated <br> with on-screen media rated for <br> domestic violence than male actors, <br> out of media rated for violence.")
+blurbs <- c("Female directors have 3.43x higher odds <br> of being associated with on-screen media <br> rated for sexual violence than male directors, <br> out of all movies rated for violence.", "Female actresses do not have significantly greater <br> odds of being billed highly (<5) in on-screen media rated for <br> rape or domestic violence than male actors.", "Female directors do not have <br> significantly greater odds of being <br> associated with on-screen media <br> rated for domestic violence, out <br> of movies rated for sexual violence.", "Female directors/producers do not have <br> significantly greater odds of being <br> associated with on-screen media rated <br> for domestic violence, out of media <br> rated for sexual violence.", "Female directors/producers do not have <br> significantly greater odds of being associated <br> with on-screen media rated for domestic <br> violence or rape, out of media rated for violence.", "Female directors/producers do not have <br> significantly greater odds of being <br> associated with on-screen media rated <br> specifically for rape out of media rated <br> for all types of sexual violence.", "Female actresses have significantly <br> greater odds of being associated <br> with on-screen media rated for <br> domestic violence than male actors, <br> out of media rated for violence.")
 
 big_table <- lapply(or_list, make_table) %>%
   bind_rows() %>%
@@ -194,12 +196,24 @@ big_table <- lapply(or_list, make_table) %>%
 ## devtools::install_github('hadley/ggplot2')
 gg <- ggplot(big_table, aes(x = p.value, y = focus_var)) +
   geom_point() +
-  ggtitle("Insert Title Here")
+  labs(title = "Sexual Violence On-Screen", x = "p Value") +
+  theme_economist() +
+  ggtitle("Sexual Violence On-Screen") +
+  scale_x_continuous(breaks = c(.05, .2, .4, .6)) +
+  theme(axis.title.y = element_blank()) +
+  scale_y_discrete(labels = c('Billing Order-Rape or Domestic Violence',
+                              'Sexual Violence',
+                              'Directors-Domestic Violence', 
+                              'Directors and Producers-Domestic Violence', 'Domestic Violence or Rape', 'Rape', 'Actors-Domestic Violence'))
 
 ## using dev version of plotly
 ## devtools::install_github("ropensci/ plotly")
 int_plot <- ggplotly(gg)
-int_plot <- style(int_plot, hoverinfo = "text", text = big_table$blurbs)
+int_plot <- style(int_plot, hoverinfo = "text", text = big_table$blurbs) %>%
+  layout(annotations = list(text = 'A p value less than .05 means the results were significant; <br> hover over a point for info.', showarrow = FALSE, x = 0.5,
+    y = 1,
+    xref = 'paper',
+    yref = 'paper'))
 int_plot
 ```
 
