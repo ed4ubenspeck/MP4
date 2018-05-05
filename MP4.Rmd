@@ -217,7 +217,7 @@ or_list <- list(or_direct_sv, or_billed_rdv, or_fem_direct, or_gender_dv, or_gen
 
 focus_var_names <- c("direct_sv", "billed_rdv", "fem_direct", "gender_dv", "gender_dvr", "gender_r", "gender_v")
 
-blurbs <- c("Female directors have 3.43x higher odds of being associated with on-screen media rated for sexual violence than male directors, out of all movies rated for violence.",  "Female actresses do not have significantly greater odds of being billed highly (<5) in on-screen media rated for rape or domestic violence than male actors.", "Female directors do not have significantly greater odds of being associated with on-screen media rated for domestic violence, out of movies rated for sexual violence.", "Female directors/producers do not have significantly greater odds of being associated with on-screen media rated for domestic violence, out of media rated for sexual violence.", "Female directors/producers do not have significantly greater odds of being associated with on-screen media rated for domestic violence or rape, out of media rated for violence.", "Insert gender_r blurb", "Female actresses have significantly greater odds of being associated with on-screen media rated for domestic violence than male actors, out of media rated for violence.")
+blurbs <- c("Female directors have 3.43x higher odds <br> of being associated with on-screen media <br> rated for sexual violence than male directors, <br> out of all movies rated for violence.",  "Female actresses do not have significantly greater <br> odds of being billed highly (<5) in on-screen media rated for <br> rape or domestic violence than male actors.", "Female directors do not have <br> significantly greater odds of being <br> associated with on-screen media <br> rated for domestic violence, out <br> of movies rated for sexual violence.", "Female directors/producers do not have <br> significantly greater odds of being <br> associated with on-screen media rated <br> for domestic violence, out of media <br> rated for sexual violence.", "Female directors/producers do not have <br> significantly greater odds of being associated <br> with on-screen media rated for domestic <br> violence or rape, out of media rated for violence.", "Insert gender_r blurb", "Female actresses have significantly <br> greater odds of being associated <br> with on-screen media rated for <br> domestic violence than male actors, <br> out of media rated for violence.")
 
 big_table <- lapply(or_list, make_table) %>%
   bind_rows() %>%
@@ -228,8 +228,9 @@ big_table <- lapply(or_list, make_table) %>%
 
 ## using updated version of ggplot2
 ## devtools::install_github('hadley/ggplot2')
-gg <- ggplot(big_table, aes(x = p.value, y = focus_var, color = sig)) +
-  geom_point()
+gg <- ggplot(big_table, aes(x = p.value, y = focus_var)) +
+  geom_point() +
+  ggtitle("Insert Title Here")
 
 ## using dev version of plotly
 ## devtools::install_github("ropensci/ plotly")
