@@ -148,39 +148,24 @@ v_media_top_rdv <- v_media %>%
 ```{r, warning = FALSE, message = FALSE}
 ## OR for answering question: Do female directors have higher odds of directing media rated for rape/domestic violence out of media containing sexual violence?
 or_fem_direct <- glm(data = sv_directors, dv_r~gender_num, family = quasibinomial(link = "logit"))
-summary(or_fem_direct)
-exp(cbind(OR = coef(or_fem_direct), confint(or_fem_direct)))
 
 ## OR for answering question: Do female directors have higher odds of being associated with media rated for domestic violence, rape, or sexual violence out of movies rated for violence?
 or_direct_sv <- glm(data = directors_v_clean, dv_r_sv~gender_num, family = quasibinomial(link = "logit"))
-summary(or_direct_sv)
-exp(cbind(OR = coef(or_direct_sv), confint(or_direct_sv)))
 
 ## OR for odds that media rated for domestic violence will be directed/produced by a female (out of media rated for types of sexual violence)
 or_gender_dv <- glm(data = dp_model_set, dv~gender_num, family = quasibinomial(link = "logit"))
-summary(or_gender_dv)
-exp(cbind(OR = coef(or_gender_dv), confint(or_gender_dv)))
-
 
 ## OR for odds that media rated for rape will be directed/produced by a female (out of media rated for types of sexual violence)
 or_gender_r <- glm(data = dp_model_set, r~gender_num, family = quasibinomial(link = "logit"))
-summary(or_gender_r)
-exp(cbind(OR = coef(or_gender_r), confint(or_gender_r)))
 
 ## OR for odds that media rated for domestic violence/rape will be directed/produced by a female (out of media rated for all types of violence
 or_gender_dvr <- glm(data = directors_producers_media, dvr~gender_num, family = quasibinomial(link = "logit"))
-summary(or_gender_dvr)
-exp(cbind(OR = coef(or_gender_dvr), confint(or_gender_dvr)))
 
 ## OR for odds that a female actress will be associated with media containing domestic violence (out of all media rated for violence)
 or_gender_v <- glm(data = v_media, dv~gender_num, family = quasibinomial(link = "logit"))
-summary(or_gender_v)
-exp(cbind(OR = coef(or_gender_v), confint(or_gender_v)))
 
 ## OR for odds that a female actress will be billed highly in media rated for rape or domestic violence
 or_billed_rdv <- glm(data = v_media_top_rdv, ranked~gender_num, family = quasibinomial(link = "logit"))
-summary(or_billed_rdv)
-exp(cbind(OR = coef(or_billed_rdv), confint(or_billed_rdv)))
 ```
 
 Saving odds ratio results as tidy data frames; only p-values:
