@@ -210,10 +210,9 @@ gg <- ggplot(big_table, aes(x = p.value, y = focus_var)) +
 ## devtools::install_github("ropensci/ plotly")
 int_plot <- ggplotly(gg)
 int_plot <- style(int_plot, hoverinfo = "text", text = big_table$blurbs) %>%
-  layout(annotations = list(text = 'A p value less than .05 means the results were significant; <br> hover over a point for info.', showarrow = FALSE, x = 0.5,
-    y = 1,
-    xref = 'paper',
-    yref = 'paper'))
+  layout(annotations = list(text = 'A p value less than .05 means the results were significant; <br> hover over a point for info.', 
+                            showarrow = FALSE, x = 0.5, y = 1, 
+                            xref = 'paper', yref = 'paper'))
 int_plot
 ```
 
