@@ -10,7 +10,8 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
+## loading required packages
 library(mdsr)
 library(RMySQL)
 library(tidyverse)
@@ -19,26 +20,10 @@ library(plotly)
 db <- dbConnect_scidb(dbname = "imdb")
 ```
 
-```{r}
-
-dv_sv_media <- db %>%
-dbGetQuery("SELECT DISTINCT ci.person_id, mi.info, mi.movie_id, t.title, n.name, n.gender, ci.nr_order 
-FROM movie_info AS mi 
-JOIN info_type it ON it.id = mi.info_type_id  
-JOIN title t ON t.id = mi.movie_id
-JOIN kind_type kt ON kt.id = t.kind_id
-JOIN cast_info ci ON ci.movie_id = mi.movie_id
-JOIN name n ON n.id = ci.person_id
-WHERE it.id = 97 AND (ci.nr_order IS NOT NULL AND n.gender IS NOT NULL) 
-AND (mi.info LIKE '%domestic violence%' OR mi.info LIKE '%sexual violence%')
-AND (t.kind_id = 1 or t.kind_id = 2 or t.kind_id = 3);")
-
-
-
-
-
+```{r, warning = FALSE, message = FALSE}
+## query for on-screen media rated for violence
 v_media <- db %>%
-dbGetQuery("SELECT DISTINCT ci.person_id, mi.info, mi.movie_id, t.title, n.name, n.gender, ci.nr_order 
+  dbGetQuery("SELECT DISTINCT ci.person_id, mi.info, mi.movie_id, t.title, n.name, n.gender, ci.nr_order 
 FROM movie_info AS mi 
 JOIN info_type it ON it.id = mi.info_type_id  
 JOIN title t ON t.id = mi.movie_id
@@ -49,7 +34,7 @@ WHERE it.id = 97 AND (ci.nr_order IS NOT NULL AND n.gender IS NOT NULL)
 AND (mi.info LIKE '%violence%')
 AND (t.kind_id = 1 or t.kind_id = 2 or t.kind_id = 3);")
 
-## Directors of movies rated for domestic or sexual violemce
+## query for directors of movies rated for domestic or sexual violemce
 directors <- db %>%
   dbGetQuery("SELECT n.name AS director, ci.person_id, n.gender, mi.info, t.title
 FROM cast_info ci
@@ -63,7 +48,7 @@ AND (t.kind_id = 1 or t.kind_id = 2 or t.kind_id = 3)
 AND it.id = 97
 AND n.gender IS NOT NULL;")
 
-## Directors and producers for movies, tv movies, and tv series rated for sexual or domestic violence
+## query for firectors and producers for movies, tv movies, and tv series rated for sexual or domestic violence
 directors_producers_media <- db %>%
   dbGetQuery("SELECT DISTINCT n.name AS director_producer, ci.person_id, n.gender, mi.info, t.title
 FROM cast_info ci
@@ -77,7 +62,7 @@ AND (t.kind_id = 1 or t.kind_id = 2 or t.kind_id = 3)
 AND it.id = 97
 AND n.gender IS NOT NULL;")
 
-## Directors for movies, tv movies, and tv series rated for violence
+## query for directors for movies, tv movies, and tv series rated for violence
 directors_violence <- db %>%
   dbGetQuery("SELECT DISTINCT n.name AS director, ci.person_id, n.gender, mi.info, t.title
 FROM cast_info ci
@@ -91,24 +76,8 @@ AND (t.kind_id = 1 or t.kind_id = 2 or t.kind_id = 3)
 AND it.id = 97
 AND n.gender IS NOT NULL;")
 
-## OR for answering: Do female directors have higher odds of directing a movie rated for a type of sexual violence than male directors?
-directors_v_clean <- directors_violence %>%
-  mutate(gender_num = ifelse(gender == 'm', 0, 1)) %>%
-  mutate(dv = grepl('domestic violence', info, ignore.case = TRUE)) %>%
-  mutate(dv = ifelse(dv == FALSE, 0, 1)) %>%
-  mutate(r = grepl('rape', info, ignore.case = TRUE)) %>%
-  mutate(r = ifelse(r == FALSE, 0, 1)) %>%
-  mutate(sv = grepl('sexual violence', info, ignore.case = TRUE)) %>%
-  mutate(sv = ifelse(sv == TRUE, 1, 0)) %>%
-  mutate(dv_r_sv = ifelse(dv == 1 | r == 1 | sv == 1, 1, 0))
 
-or_direct_sv <-glm(data = directors_v_clean, dv_r_sv~gender_num, family=quasibinomial(link="logit"))
-summary(or_direct_sv)
-exp(cbind(OR=coef(or_direct_sv), confint(or_direct_sv)))
-##Answer: YES!!! When taking all movies rated for some kind of violence, female directors have significantly higher odds of being associated with a movie rated for domestic violence, rape, or sexual violence
-
-
-## Directors and producers for movies, tv movies, and tv series rated for sexual or domestic violence, distinguished by role type
+## query for directors and producers for movies, tv movies, and tv series rated for sexual or domestic violence, distinguished by role type
 dp_distinct <- db %>%
   dbGetQuery("SELECT DISTINCT n.name, ci.person_id, n.gender, role_id, mi.info, t.title
 FROM cast_info ci
@@ -121,93 +90,103 @@ AND (mi.info LIKE '%domestic violence%' OR mi.info LIKE '%sexual violence%' OR m
 AND (t.kind_id = 1 or t.kind_id = 2 or t.kind_id = 3)
 AND it.id = 97
 AND n.gender IS NOT NULL;")
-
-## wrangling of this last dataset
-sv_directors  <- dp_distinct %>%
-  mutate(director = ifelse(role_id == 8, 1, 0)) %>%
-  filter(director == 1) %>%
-  mutate(gender_num = ifelse(gender == 'm', 0, 1)) %>%
-  mutate(dv = grepl('domestic violence', info, ignore.case = TRUE)) %>%
-  mutate(dv = ifelse(dv == FALSE, 0, 1)) %>%
-  mutate(r = grepl('rape', info, ignore.case = TRUE)) %>%
-  mutate(r = ifelse(r == FALSE, 0, 1)) %>%
-  mutate(dv_r = ifelse(r == 1 | dv == 1, 1, 0))
-
-## OR for answering question: Do female directors have higher odds of directing films rated for rape/domestic violence out of movies containing sexual violence? 
-or_fem_direct <- glm(data = sv_directors, dv_r~gender_num, family=quasibinomial(link="logit"))
-summary(or_fem_direct)
-exp(cbind(OR=coef(or_fem_direct), confint(or_fem_direct)))
-## Answer: not signficant, but this is interesting and unexpected! 
 ```
+
 
 
 Data Wrangling for Orientation: 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 
 dp_model_set <- directors_producers_media %>%
-  mutate(gender_num = ifelse(gender == 'm', 0, 1)) %>%
-  mutate(dv = grepl('domestic violence', info, ignore.case = TRUE)) %>%
+  mutate(gender_num = ifelse(gender == "m", 0, 1)) %>%
+  mutate(dv = grepl("domestic violence", info, ignore.case = TRUE)) %>%
   mutate(dv = ifelse(dv == FALSE, 0, 1)) %>%
-  mutate(r = grepl('rape', info, ignore.case = TRUE)) %>%
+  mutate(r = grepl("rape", info, ignore.case = TRUE)) %>%
   mutate(r = ifelse(r == FALSE, 0, 1))
-  
-## OR for odds that a movie rated for domestic violence will be directed/produced by a female (out of movies rated for types of sexual violence)
-or_gender_dv <-glm(data = dp_model_set, dv~gender_num, family=quasibinomial(link="logit"))
-summary(or_gender_dv)
-exp(cbind(OR=coef(or_gender_dv), confint(or_gender_dv)))
-## Answer: Females do not have significantly higher odds of directing/producing a movie rated for domestic violence out of movies rated fro types of sexual violence. 
 
-
-## OR for odds that a movie rated for rape will be directed/produced by a female (out of movies rated for types of sexual violence)
-or_gender_r <-glm(data = dp_model_set, r~gender_num, family=quasibinomial(link="logit"))
-summary(or_gender_r)
-exp(cbind(OR=coef(or_gender_r), confint(or_gender_r)))
-## Answer: females do not have significantly higher odds of directing/producing a movie rated for rape out of movies rated for all types of sexual violence. 
-
-## OR for odds that media rated for domestic violence/rape will be directed/produced by a female (out of media rated for all types of violence)
-directors_producers_media <- directors_producers_media %>%
-  mutate(gender_num = ifelse(gender == 'm', 0, 1)) %>%
-  mutate(dv = grepl('domestic violence', info, ignore.case = TRUE)) %>%
+sv_directors <- dp_distinct %>%
+  mutate(director = ifelse(role_id == 8, 1, 0)) %>%
+  filter(director == 1) %>%
+  mutate(gender_num = ifelse(gender == "m", 0, 1)) %>%
+  mutate(dv = grepl("domestic violence", info, ignore.case = TRUE)) %>%
   mutate(dv = ifelse(dv == FALSE, 0, 1)) %>%
-  mutate(r = grepl('rape', info, ignore.case = TRUE)) %>%
+  mutate(r = grepl("rape", info, ignore.case = TRUE)) %>%
+  mutate(r = ifelse(r == FALSE, 0, 1)) %>%
+  mutate(dv_r = ifelse(r == 1 | dv == 1, 1, 0))
+
+directors_v_clean <- directors_violence %>%
+  mutate(gender_num = ifelse(gender == "m", 0, 1)) %>%
+  mutate(dv = grepl("domestic violence", info, ignore.case = TRUE)) %>%
+  mutate(dv = ifelse(dv == FALSE, 0, 1)) %>%
+  mutate(r = grepl("rape", info, ignore.case = TRUE)) %>%
+  mutate(r = ifelse(r == FALSE, 0, 1)) %>%
+  mutate(sv = grepl("sexual violence", info, ignore.case = TRUE)) %>%
+  mutate(sv = ifelse(sv == TRUE, 1, 0)) %>%
+  mutate(dv_r_sv = ifelse(dv == 1 | r == 1 | sv == 1, 1, 0))
+
+directors_producers_media <- directors_producers_media %>%
+  mutate(gender_num = ifelse(gender == "m", 0, 1)) %>%
+  mutate(dv = grepl("domestic violence", info, ignore.case = TRUE)) %>%
+  mutate(dv = ifelse(dv == FALSE, 0, 1)) %>%
+  mutate(r = grepl("rape", info, ignore.case = TRUE)) %>%
   mutate(r = ifelse(r == FALSE, 0, 1)) %>%
   mutate(dvr = ifelse(r == 1 | dv == 1, 1, 0))
 
-or_gender_dvr <- glm(data = directors_producers_media, dvr~gender_num, family=quasibinomial(link = "logit"))
-summary(or_gender_dvr)
-exp(cbind(OR=coef(or_gender_dvr), confint(or_gender_dvr)))
-## Not significant
-
 v_media <- v_media %>%
-  mutate(gender_num = ifelse(gender == 'm', 0, 1)) %>%
-  mutate(dv = grepl('domestic violence', info, ignore.case = TRUE)) %>%
+  mutate(gender_num = ifelse(gender == "m", 0, 1)) %>%
+  mutate(dv = grepl("domestic violence", info, ignore.case = TRUE)) %>%
   mutate(dv = ifelse(dv == FALSE, 0, 1)) %>%
-  mutate(r = grepl('rape', info, ignore.case = TRUE)) %>%
+  mutate(r = grepl("rape", info, ignore.case = TRUE)) %>%
   mutate(r = ifelse(r == FALSE, 0, 1))
 
-## OR for odds that a female actress will be associated with a move containing domestic violence (out of all movies rated for violence)
-or_gender_v <- glm(data = v_media, dv~gender_num, family=quasibinomial(link="logit"))
-summary(or_gender_v)
-exp(cbind(OR=coef(or_gender_v), confint(or_gender_v)))
-## Answer: Female actresses have significantly higher odds of being associated with a movie rated for domestic violence than male actors
-
-
-## added a variable for if an actor/actress is in top five billed, will be using for analysis of following question: Among movies rated for rape/domestic violence, are women more or less likely to be billed highly?
 v_media_top_rdv <- v_media %>%
   mutate(ranked = ifelse(nr_order <= 5, 1, 0)) %>%
   filter(r == 1 | dv == 1)
+```
 
 
-or_billed_rdv <- glm(data = v_media_top_rdv, ranked~gender_num, family=quasibinomial(link="logit"))
+```{r, warning = FALSE, message = FALSE}
+## OR for answering question: Do female directors have higher odds of directing media rated for rape/domestic violence out of media containing sexual violence?
+or_fem_direct <- glm(data = sv_directors, dv_r~gender_num, family = quasibinomial(link = "logit"))
+summary(or_fem_direct)
+exp(cbind(OR = coef(or_fem_direct), confint(or_fem_direct)))
+
+## OR for answering question: Do female directors have higher odds of being associated with media rated for domestic violence, rape, or sexual violence out of movies rated for violence?
+or_direct_sv <- glm(data = directors_v_clean, dv_r_sv~gender_num, family = quasibinomial(link = "logit"))
+summary(or_direct_sv)
+exp(cbind(OR = coef(or_direct_sv), confint(or_direct_sv)))
+
+## OR for odds that media rated for domestic violence will be directed/produced by a female (out of media rated for types of sexual violence)
+or_gender_dv <- glm(data = dp_model_set, dv~gender_num, family = quasibinomial(link = "logit"))
+summary(or_gender_dv)
+exp(cbind(OR = coef(or_gender_dv), confint(or_gender_dv)))
+
+
+## OR for odds that media rated for rape will be directed/produced by a female (out of media rated for types of sexual violence)
+or_gender_r <- glm(data = dp_model_set, r~gender_num, family = quasibinomial(link = "logit"))
+summary(or_gender_r)
+exp(cbind(OR = coef(or_gender_r), confint(or_gender_r)))
+
+## OR for odds that media rated for domestic violence/rape will be directed/produced by a female (out of media rated for all types of violence
+or_gender_dvr <- glm(data = directors_producers_media, dvr~gender_num, family = quasibinomial(link = "logit"))
+summary(or_gender_dvr)
+exp(cbind(OR = coef(or_gender_dvr), confint(or_gender_dvr)))
+
+## OR for odds that a female actress will be associated with media containing domestic violence (out of all media rated for violence)
+or_gender_v <- glm(data = v_media, dv~gender_num, family = quasibinomial(link = "logit"))
+summary(or_gender_v)
+exp(cbind(OR = coef(or_gender_v), confint(or_gender_v)))
+
+## OR for odds that a female actress will be billed highly in media rated for rape or domestic violence
+or_billed_rdv <- glm(data = v_media_top_rdv, ranked~gender_num, family = quasibinomial(link = "logit"))
 summary(or_billed_rdv)
-exp(cbind(OR=coef(or_billed_rdv), confint(or_billed_rdv)))
-## Answer: Females do not have significantly different odds of being billed highly in movies rated for rape/domestic violence than male actors
+exp(cbind(OR = coef(or_billed_rdv), confint(or_billed_rdv)))
 ```
 
 Saving odds ratio results as tidy data frames; only p-values:
-```{r}
+```{r, warning = FALSE, message = FALSE}
 
-make_table <- function(or_arg){
+make_table <- function(or_arg) {
   tidy(or_arg) %>%
     select(term, p.value) %>%
     filter(term == "gender_num")
@@ -217,7 +196,7 @@ or_list <- list(or_direct_sv, or_billed_rdv, or_fem_direct, or_gender_dv, or_gen
 
 focus_var_names <- c("direct_sv", "billed_rdv", "fem_direct", "gender_dv", "gender_dvr", "gender_r", "gender_v")
 
-blurbs <- c("Female directors have 3.43x higher odds <br> of being associated with on-screen media <br> rated for sexual violence than male directors, <br> out of all movies rated for violence.",  "Female actresses do not have significantly greater <br> odds of being billed highly (<5) in on-screen media rated for <br> rape or domestic violence than male actors.", "Female directors do not have <br> significantly greater odds of being <br> associated with on-screen media <br> rated for domestic violence, out <br> of movies rated for sexual violence.", "Female directors/producers do not have <br> significantly greater odds of being <br> associated with on-screen media rated <br> for domestic violence, out of media <br> rated for sexual violence.", "Female directors/producers do not have <br> significantly greater odds of being associated <br> with on-screen media rated for domestic <br> violence or rape, out of media rated for violence.", "Insert gender_r blurb", "Female actresses have significantly <br> greater odds of being associated <br> with on-screen media rated for <br> domestic violence than male actors, <br> out of media rated for violence.")
+blurbs <- c("Female directors have 3.43x higher odds <br> of being associated with on-screen media <br> rated for sexual violence than male directors, <br> out of all movies rated for violence.", "Female actresses do not have significantly greater <br> odds of being billed highly (<5) in on-screen media rated for <br> rape or domestic violence than male actors.", "Female directors do not have <br> significantly greater odds of being <br> associated with on-screen media <br> rated for domestic violence, out <br> of movies rated for sexual violence.", "Female directors/producers do not have <br> significantly greater odds of being <br> associated with on-screen media rated <br> for domestic violence, out of media <br> rated for sexual violence.", "Female directors/producers do not have <br> significantly greater odds of being associated <br> with on-screen media rated for domestic <br> violence or rape, out of media rated for violence.", "Insert gender_r blurb", "Female actresses have significantly <br> greater odds of being associated <br> with on-screen media rated for <br> domestic violence than male actors, <br> out of media rated for violence.")
 
 big_table <- lapply(or_list, make_table) %>%
   bind_rows() %>%
@@ -235,7 +214,7 @@ gg <- ggplot(big_table, aes(x = p.value, y = focus_var)) +
 ## using dev version of plotly
 ## devtools::install_github("ropensci/ plotly")
 int_plot <- ggplotly(gg)
-int_plot <- style(int_plot, hoverinfo = 'text', text = big_table$blurbs)
+int_plot <- style(int_plot, hoverinfo = "text", text = big_table$blurbs)
 int_plot
 ```
 
