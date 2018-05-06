@@ -2,6 +2,10 @@
 title: "MP4"
 output: 
   html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    theme: spacelab
     code_folding: hide
 
 ---
@@ -9,6 +13,18 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+**Content Warning:** *This article contains a discussion centered around forms of sexual violence and gender bias in non-explicit terms; please take note of this before proceeding.*
+
+## The Problem: 
+
+[Vice’s Trish Bendix](https://broadly.vice.com/en_us/article/zmzz79/this-new-woman-directed-film-explores-the-devastating-aftermath-of-rape) writes, “On-screen glorification of rape and assault has been a point of contention for years in television and film, but that hasn't stopped filmmakers, writers, or directors—most of them men—from inserting hard-to-watch scenes of sexual violence in their projects.” It’s true; domestic and sexual violence are being portrayed in media, especially on-screen, with [rapidly increasing prevalence](https://www.ncbi.nlm.nih.gov/pubmed/22727080). 
+
+In a male-dominated industry, with over three times as many male directors than female, of course more men are directing films portraying sexual and domestic violence, as well as violence in general. But what if we really get into the numbers? **Are female actresses and directors more likely than male actors and directors to be associated with on-screen media depicting acts of sexual violence, domestic violence, and rape?**
+
+## Our Analysis: 
+
+Our analysis is based around the IMDB database, from which we distilled information regarding the ratings of on-screen media[^1], the cast and directorial staff of each production, and their genders. This information was used to produce different datasets, the two most pertinent of which included on-screen media rated for violence and its corresponding directorial staff, and on-screen media rated for violence and its corresponding cast members.  Logistic regression was used to produce analyses on the odds of female directors and actresses being associated with media containing types of sexual violence. 
 
 ```{r, warning = FALSE, message = FALSE}
 ## loading required packages
@@ -95,9 +111,9 @@ AND n.gender IS NOT NULL;")
 
 
 
-Data Wrangling for Orientation: 
 ```{r, warning = FALSE, message = FALSE}
 
+## dataset for directors/producers rated for violence with new variables for ratings for rape and domestic violence
 dp_model_set <- directors_producers_media %>%
   mutate(gender_num = ifelse(gender == "m", 0, 1)) %>%
   mutate(dv = grepl("domestic violence", info, ignore.case = TRUE)) %>%
@@ -105,6 +121,7 @@ dp_model_set <- directors_producers_media %>%
   mutate(r = grepl("rape", info, ignore.case = TRUE)) %>%
   mutate(r = ifelse(r == FALSE, 0, 1))
 
+## dataset for directors rated for sexual violence with new variables for ratings for rape and domestic violence
 sv_directors <- dp_distinct %>%
   mutate(director = ifelse(role_id == 8, 1, 0)) %>%
   filter(director == 1) %>%
@@ -115,6 +132,7 @@ sv_directors <- dp_distinct %>%
   mutate(r = ifelse(r == FALSE, 0, 1)) %>%
   mutate(dv_r = ifelse(r == 1 | dv == 1, 1, 0))
 
+## dataset for directors rated for violence with new variables for ratings for rape, domestic violence, and sexual violence
 directors_v_clean <- directors_violence %>%
   mutate(gender_num = ifelse(gender == "m", 0, 1)) %>%
   mutate(dv = grepl("domestic violence", info, ignore.case = TRUE)) %>%
@@ -125,6 +143,7 @@ directors_v_clean <- directors_violence %>%
   mutate(sv = ifelse(sv == TRUE, 1, 0)) %>%
   mutate(dv_r_sv = ifelse(dv == 1 | r == 1 | sv == 1, 1, 0))
 
+## dataset for directors/producers rated for violence with new variables for ratings for rape, domestic violence, and domestic violence or rape
 directors_producers_media <- directors_producers_media %>%
   mutate(gender_num = ifelse(gender == "m", 0, 1)) %>%
   mutate(dv = grepl("domestic violence", info, ignore.case = TRUE)) %>%
@@ -133,6 +152,7 @@ directors_producers_media <- directors_producers_media %>%
   mutate(r = ifelse(r == FALSE, 0, 1)) %>%
   mutate(dvr = ifelse(r == 1 | dv == 1, 1, 0))
 
+## dataset for actors/actresses rated for violence with new variables for domestic violence and rape
 v_media <- v_media %>%
   mutate(gender_num = ifelse(gender == "m", 0, 1)) %>%
   mutate(dv = grepl("domestic violence", info, ignore.case = TRUE)) %>%
@@ -140,6 +160,7 @@ v_media <- v_media %>%
   mutate(r = grepl("rape", info, ignore.case = TRUE)) %>%
   mutate(r = ifelse(r == FALSE, 0, 1))
 
+## datset for actors/actresses rated for violence with new variable for billing order
 v_media_top_rdv <- v_media %>%
   mutate(ranked = ifelse(nr_order <= 5, 1, 0)) %>%
   filter(r == 1 | dv == 1)
@@ -169,22 +190,31 @@ or_gender_v <- glm(data = v_media, dv~gender_num, family = quasibinomial(link = 
 or_billed_rdv <- glm(data = v_media_top_rdv, ranked~gender_num, family = quasibinomial(link = "logit"))
 ```
 
-Saving odds ratio results as tidy data frames; only p-values;
-Hover over point for info:
+## What We Found: 
+
+When looking at on-screen media rated for violence, female directors are significantly more likely to be associated with media rated for sexual and domestic violence as well as rape. When female directors take the reins, they are considerably more likely than male directors to tackle media containing sexual violence, domestic violence, or rape, which are all often considered to be [“gendered” types of violence](https://www.unfpa.org/gender-based-violence), since sexual violence against men is still highly stigmatized and not shown in popular media at the same rate as sexual violence against women.
+
+Female actresses are not significantly more likely to be billed highly in media rated for rape/domestic violence, which could possibly be confounded by the alphabetical nature of some billings. In addition, female directors/producers do not have higher odds of directing/producing media rated for rape out of movies rated for all types of violence. The inclusion of producers might be confounding our results to some degree; there are more producers on a film than directors, and women make up a higher proportion of producers than directors [(25% versus 18%)](http://womenandhollywood.com/resources/statistics/2017-statistics/). It is therefore possible that there are more female producers to be distributed around movies rated for different things. 
+
 ```{r, warning = FALSE, message = FALSE}
 
+## function for extracting relevant information from each odds ratio summary
 make_table <- function(or_arg) {
   tidy(or_arg) %>%
     select(term, p.value) %>%
     filter(term == "gender_num")
 }
 
+## list of odds ratios
 or_list <- list(or_direct_sv, or_billed_rdv, or_fem_direct, or_gender_dv, or_gender_dvr, or_gender_r, or_gender_v)
 
+## names for pertinant variables for each odds ratio
 focus_var_names <- c("direct_sv", "billed_rdv", "fem_direct", "gender_dv", "gender_dvr", "gender_r", "gender_v")
 
+## vector for summaries of each odds ratio's interpretation
 blurbs <- c("Female directors have 3.43x higher odds <br> of being associated with on-screen media <br> rated for sexual violence than male directors, <br> out of all movies rated for violence.", "Female actresses do not have significantly greater <br> odds of being billed highly (<5) in on-screen media rated for <br> rape or domestic violence than male actors.", "Female directors do not have <br> significantly greater odds of being <br> associated with on-screen media <br> rated for domestic violence, out <br> of movies rated for sexual violence.", "Female directors/producers do not have <br> significantly greater odds of being <br> associated with on-screen media rated <br> for domestic violence, out of media <br> rated for sexual violence.", "Female directors/producers do not have <br> significantly greater odds of being associated <br> with on-screen media rated for domestic <br> violence or rape, out of media rated for violence.", "Female directors/producers do not have <br> significantly greater odds of being <br> associated with on-screen media rated <br> specifically for rape out of media rated <br> for all types of sexual violence.", "Female actresses have significantly <br> greater odds of being associated <br> with on-screen media rated for <br> domestic violence than male actors, <br> out of media rated for violence.")
 
+## table of all odds ratios' information
 big_table <- lapply(or_list, make_table) %>%
   bind_rows() %>%
   mutate(focus_var = focus_var_names) %>%
@@ -192,8 +222,7 @@ big_table <- lapply(or_list, make_table) %>%
   mutate(sig = ifelse(p.value <= .05, "significant", "insignificant"))
 
 
-## using updated version of ggplot2
-## devtools::install_github('hadley/ggplot2')
+## producing ggplot of odds ratios' significance, including blurbs
 gg <- ggplot(big_table, aes(x = p.value, y = focus_var)) +
   geom_point() +
   labs(title = "Sexual Violence On-Screen", x = "p Value") +
@@ -201,19 +230,35 @@ gg <- ggplot(big_table, aes(x = p.value, y = focus_var)) +
   ggtitle("Sexual Violence On-Screen") +
   scale_x_continuous(breaks = c(.05, .2, .4, .6)) +
   theme(axis.title.y = element_blank()) +
-  scale_y_discrete(labels = c('Billing Order-Rape or Domestic Violence',
-                              'Sexual Violence',
-                              'Directors-Domestic Violence', 
-                              'Directors and Producers-Domestic Violence', 'Domestic Violence or Rape', 'Rape', 'Actors-Domestic Violence'))
+  scale_y_discrete(labels = c(
+    "Billing Order-Rape or Domestic Violence",
+    "Sexual Violence",
+    "Directors-Domestic Violence",
+    "Directors and Producers-Domestic Violence", "Domestic Violence or Rape", "Rape", "Actors-Domestic Violence"
+  ))
 
-## using dev version of plotly
-## devtools::install_github("ropensci/ plotly")
+## adding additions to ggplot
 int_plot <- ggplotly(gg)
 int_plot <- style(int_plot, hoverinfo = "text", text = big_table$blurbs) %>%
-  layout(annotations = list(text = 'A p value less than .05 means the results were significant; <br> hover over a point for info.', 
-                            showarrow = FALSE, x = 0.5, y = 1, 
-                            xref = 'paper', yref = 'paper'))
+  layout(annotations = list(
+    text = "A p value less than .05 means the results were significant; <br> hover over a point for info.",
+    showarrow = FALSE, x = 0.5, y = 1,
+    xref = "paper", yref = "paper"
+  ))
 int_plot
 ```
 
+## What Now?
 
+The question becomes, when examining our significant findings, why are female directors and actresses filling these roles in the production of movies showcasing gendered violence? Each of the authors comes to the table with a different perspective on the issue, which are highlighted below:
+
+**Emily:** *“I’m pretty inclined to believe that women in Hollywood are being tapped to perform emotional labor, in a way, by being centered in these kinds of films. The current perspective seems to be that this kind of violence is definitely a “women’s issue”, so women seem almost expected to show up and engage in portrayals of rape and domestic violence so that we have any kind of representation of it in the media. [Clover Hope, at The Muse](https://themuse.jezebel.com/the-effects-of-metoo-on-films-violent-male-gaze-1823371088), writes about “women as props for the male director’s inhibitions” and how actresses in the industry are expected to engage with this media for the sake of the artform. As to why female directors face the same kind of odds, I think there’s a reigning bias regarding what kinds of films are appropriate for women to direct, and I worry that they might be getting pigeon-holed into these positions.”*
+
+**Sophia:** *“Emily’s analysis definitely makes sense; if the industry is so heavily male-dominated, then it absolutely impacts the kinds of work and media that male and female directors are asked to direct and be a part of. However, I wonder if perhaps this argument doesn’t give many female directors enough credit. A lot of women who have recently been involved in [films dealing with domestic and sexual violence](https://uniondocs.org/event/2018-04-19-another-gaze-unvictiming/) are [incredibly intentional with their work](https://www.pbs.org/newshour/arts/this-is-just-the-beginning-of-change-in-the-industry-says-female-director-of-new-movie-about-life-after-sexual-assault), using on-screen media as a means of impacting and reaching broad a audience. Female directors are creating works that are helping to shift the industry away from incredibly careless depictions of sexual violence by creating works that are deliberate, impactful, and important. I also think it’s incredibly important to note that trans people and non-binary people face sexual violence at an [especially high rate](https://www.hrc.org/resources/sexual-assault-and-the-lgbt-community), though we didn’t explicitly address it in this piece.”*
+
+**Lynn:** *“While women directors are making great strides in portrayal of sexual violence on screen, the film canon is still rife with poorly executed stories about rape. Women’s suffering has frequently been used as a plot point for the character development of men, to the point that it’s become a well-documented trope called “women in refrigerators”. When these women are afforded sufficient agency as to have storylines of their own, rape is the go-to tragic backstory (Kill Bill, The Girl With The Dragon Tattoo). These storytelling nuances, however, are impossible to quantify. Furthermore, there’s quite a few films that deal with sexual assault without outright describing or showing the act itself. Commonly, the male lead is tasked with saving the female lead from a situation where it's implied she’s being raped or about to be raped (Star Wars: Return of the Jedi, Back to the Future). These movies would be left out of our analysis, as they’re not explicitly rated for sexual assault. Additionally, there is a disturbing subset of sexually explicit films in which the actresses are coerced or otherwise mistreated in the shooting of those scenes ([Blue is the Warmest Colour](https://www.independent.co.uk/arts-entertainment/films/features/blue-is-the-warmest-colour-actresses-on-their-lesbian-sex-scenes-we-felt-like-prostitutes-8856909.html), [Last Tango in Paris](http://variety.com/2016/film/news/last-tango-in-paris-rape-scene-consensual-bernardo-bertolucci-1201933117/)). These cases would similarly be excluded from analysis, in part due to the pre-#MeToo culture of silence in Hollywood.”* 
+
+<b>
+<b>
+
+[^1]: On-screen media includes feature-length films, tv series, and tv movies
