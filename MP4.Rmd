@@ -1,5 +1,5 @@
 ---
-title: "MP4"
+title:
 output: 
   html_document:
     toc: true
@@ -10,9 +10,7 @@ output:
 
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+![](https://media.azpm.org/master/image/2018/2/28/show-logos/metoo-nowwhat.png)
 
 **Content Warning:** *This article contains a discussion centered around forms of sexual violence and gender bias in non-explicit terms; please take note of this before proceeding.*
 
@@ -22,9 +20,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 In a male-dominated industry, with over three times as many male directors than female, of course more men are directing films portraying sexual and domestic violence, as well as violence in general. But what if we really get into the numbers? **Are female actresses and directors more likely than male actors and directors to be associated with on-screen media depicting acts of sexual violence, domestic violence, and rape?**
 
+![](http://www.jenniferirelandmakeup.co.uk/images/latest/hr.jpg)
+
 ## Our Analysis: 
 
-Our analysis is based around the IMDB database, from which we distilled information regarding the ratings of on-screen media[^1], the cast and directorial staff of each production, and their genders. This information was used to produce different datasets, the two most pertinent of which included on-screen media rated for violence and its corresponding directorial staff, and on-screen media rated for violence and its corresponding cast members.  Logistic regression was used to produce analyses on the odds of female directors and actresses being associated with media containing types of sexual violence. 
+Our analysis[^2] is based around the IMDB database, from which we distilled information regarding the ratings of on-screen media[^1], the cast and directorial staff of each production, and their genders. This information was used to produce different datasets, the two most pertinent of which included on-screen media rated for violence and its corresponding directorial staff, and on-screen media rated for violence and its corresponding cast members.  Logistic regression was used to produce analyses on the odds of female directors and actresses being associated with media containing types of sexual violence. 
 
 ```{r, warning = FALSE, message = FALSE}
 ## loading required packages
@@ -190,13 +190,15 @@ or_gender_v <- glm(data = v_media, dv~gender_num, family = quasibinomial(link = 
 or_billed_rdv <- glm(data = v_media_top_rdv, ranked~gender_num, family = quasibinomial(link = "logit"))
 ```
 
+![](http://www.jenniferirelandmakeup.co.uk/images/latest/hr.jpg)
+
 ## What We Found: 
 
-When looking at on-screen media rated for violence, female directors are significantly more likely to be associated with media rated for sexual and domestic violence as well as rape. When female directors take the reins, they are considerably more likely than male directors to tackle media containing sexual violence, domestic violence, or rape, which are all often considered to be [“gendered” types of violence](https://www.unfpa.org/gender-based-violence), since sexual violence against men is still highly stigmatized and not shown in popular media at the same rate as sexual violence against women.
+As seen in the graphic below, when looking at on-screen media rated for violence, female directors are significantly more likely to be associated with media rated for sexual and domestic violence as well as rape. When female directors take the reins, they are considerably more likely than male directors to tackle media containing sexual violence, domestic violence, or rape, which are all often considered to be [“gendered” types of violence](https://www.unfpa.org/gender-based-violence), since sexual violence against men is still highly stigmatized and not shown in popular media at the same rate as sexual violence against women.
 
 Female actresses are not significantly more likely to be billed highly in media rated for rape/domestic violence, which could possibly be confounded by the alphabetical nature of some billings. In addition, female directors/producers do not have higher odds of directing/producing media rated for rape out of movies rated for all types of violence. The inclusion of producers might be confounding our results to some degree; there are more producers on a film than directors, and women make up a higher proportion of producers than directors [(25% versus 18%)](http://womenandhollywood.com/resources/statistics/2017-statistics/). It is therefore possible that there are more female producers to be distributed around movies rated for different things. 
 
-```{r, warning = FALSE, message = FALSE}
+```{r, warning = FALSE, message = FALSE, fig.width = 8.5}
 
 ## function for extracting relevant information from each odds ratio summary
 make_table <- function(or_arg) {
@@ -248,17 +250,23 @@ int_plot <- style(int_plot, hoverinfo = "text", text = big_table$blurbs) %>%
 int_plot
 ```
 
+![](http://www.jenniferirelandmakeup.co.uk/images/latest/hr.jpg)
+
 ## What Now?
 
 The question becomes, when examining our significant findings, why are female directors and actresses filling these roles in the production of movies showcasing gendered violence? Each of the authors comes to the table with a different perspective on the issue, which are highlighted below:
 
-**Emily:** *“I’m pretty inclined to believe that women in Hollywood are being tapped to perform emotional labor, in a way, by being centered in these kinds of films. The current perspective seems to be that this kind of violence is definitely a “women’s issue”, so women seem almost expected to show up and engage in portrayals of rape and domestic violence so that we have any kind of representation of it in the media. [Clover Hope, at The Muse](https://themuse.jezebel.com/the-effects-of-metoo-on-films-violent-male-gaze-1823371088), writes about “women as props for the male director’s inhibitions” and how actresses in the industry are expected to engage with this media for the sake of the artform. As to why female directors face the same kind of odds, I think there’s a reigning bias regarding what kinds of films are appropriate for women to direct, and I worry that they might be getting pigeon-holed into these positions.”*
+###Emily
+*“I’m pretty inclined to believe that women in Hollywood are being tapped to perform emotional labor, in a way, by being centered in these kinds of films. The current perspective seems to be that this kind of violence is definitely a “women’s issue”, so women seem almost expected to show up and engage in portrayals of rape and domestic violence so that we have any kind of representation of it in the media. [Clover Hope, at The Muse](https://themuse.jezebel.com/the-effects-of-metoo-on-films-violent-male-gaze-1823371088), writes about “women as props for the male director’s inhibitions” and how actresses in the industry are expected to engage with this media for the sake of the artform. As to why female directors face the same kind of odds, I think there’s a reigning bias regarding what kinds of films are appropriate for women to direct, and I worry that they might be getting pigeon-holed into these positions.”*
 
-**Sophia:** *“Emily’s analysis definitely makes sense; if the industry is so heavily male-dominated, then it absolutely impacts the kinds of work and media that male and female directors are asked to direct and be a part of. However, I wonder if perhaps this argument doesn’t give many female directors enough credit. A lot of women who have recently been involved in [films dealing with domestic and sexual violence](https://uniondocs.org/event/2018-04-19-another-gaze-unvictiming/) are [incredibly intentional with their work](https://www.pbs.org/newshour/arts/this-is-just-the-beginning-of-change-in-the-industry-says-female-director-of-new-movie-about-life-after-sexual-assault), using on-screen media as a means of impacting and reaching broad a audience. Female directors are creating works that are helping to shift the industry away from incredibly careless depictions of sexual violence by creating works that are deliberate, impactful, and important. I also think it’s incredibly important to note that trans people and non-binary people face sexual violence at an [especially high rate](https://www.hrc.org/resources/sexual-assault-and-the-lgbt-community), though we didn’t explicitly address it in this piece.”*
+###Sophia 
+*“Emily’s analysis definitely makes sense; if the industry is so heavily male-dominated, then it absolutely impacts the kinds of work and media that male and female directors are asked to direct and be a part of. However, I wonder if perhaps this argument doesn’t give many female directors enough credit. A lot of women who have recently been involved in [films dealing with domestic and sexual violence](https://uniondocs.org/event/2018-04-19-another-gaze-unvictiming/) are [incredibly intentional with their work](https://www.pbs.org/newshour/arts/this-is-just-the-beginning-of-change-in-the-industry-says-female-director-of-new-movie-about-life-after-sexual-assault), using on-screen media as a means of impacting and reaching broad a audience. Female directors are creating works that are helping to shift the industry away from incredibly careless depictions of sexual violence by creating works that are deliberate, impactful, and important. I also think it’s incredibly important to note that trans people and non-binary people face sexual violence at an [especially high rate](https://www.hrc.org/resources/sexual-assault-and-the-lgbt-community), though we didn’t explicitly address it in this piece.”*
 
-**Lynn:** *“While women directors are making great strides in portrayal of sexual violence on screen, the film canon is still rife with poorly executed stories about rape. Women’s suffering has frequently been used as a plot point for the character development of men, to the point that it’s become a well-documented trope called “women in refrigerators”. When these women are afforded sufficient agency as to have storylines of their own, rape is the go-to tragic backstory (Kill Bill, The Girl With The Dragon Tattoo). These storytelling nuances, however, are impossible to quantify. Furthermore, there’s quite a few films that deal with sexual assault without outright describing or showing the act itself. Commonly, the male lead is tasked with saving the female lead from a situation where it's implied she’s being raped or about to be raped (Star Wars: Return of the Jedi, Back to the Future). These movies would be left out of our analysis, as they’re not explicitly rated for sexual assault. Additionally, there is a disturbing subset of sexually explicit films in which the actresses are coerced or otherwise mistreated in the shooting of those scenes ([Blue is the Warmest Colour](https://www.independent.co.uk/arts-entertainment/films/features/blue-is-the-warmest-colour-actresses-on-their-lesbian-sex-scenes-we-felt-like-prostitutes-8856909.html), [Last Tango in Paris](http://variety.com/2016/film/news/last-tango-in-paris-rape-scene-consensual-bernardo-bertolucci-1201933117/)). These cases would similarly be excluded from analysis, in part due to the pre-#MeToo culture of silence in Hollywood.”* 
+###Lynn 
+*“While women directors are making great strides in portrayal of sexual violence on screen, the film canon is still rife with poorly executed stories about rape. Women’s suffering has frequently been used as a plot point for the character development of men, to the point that it’s become a well-documented trope called “women in refrigerators”. When these women are afforded sufficient agency as to have storylines of their own, rape is the go-to tragic backstory (Kill Bill, The Girl With The Dragon Tattoo). These storytelling nuances, however, are impossible to quantify. Furthermore, there’s quite a few films that deal with sexual assault without outright describing or showing the act itself. Commonly, the male lead is tasked with saving the female lead from a situation where it's implied she’s being raped or about to be raped (Star Wars: Return of the Jedi, Back to the Future). These movies would be left out of our analysis, as they’re not explicitly rated for sexual assault. Additionally, there is a disturbing subset of sexually explicit films in which the actresses are coerced or otherwise mistreated in the shooting of those scenes ([Blue is the Warmest Colour](https://www.independent.co.uk/arts-entertainment/films/features/blue-is-the-warmest-colour-actresses-on-their-lesbian-sex-scenes-we-felt-like-prostitutes-8856909.html), [Last Tango in Paris](http://variety.com/2016/film/news/last-tango-in-paris-rape-scene-consensual-bernardo-bertolucci-1201933117/)). These cases would similarly be excluded from analysis, in part due to the pre-#MeToo culture of silence in Hollywood.”* 
 
 <b>
 <b>
 
 [^1]: On-screen media includes feature-length films, tv series, and tv movies
+[^2]: [GitHub Repository](https://github.com/ed4ubenspeck/MP4.git)
